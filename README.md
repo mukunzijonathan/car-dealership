@@ -2,139 +2,136 @@
 
 ## Abstract
 
-The Car Dealership Management System is a JSF and Hibernate web application for maintaining a dealership's car inventory and customer directory. It provides create, read, update, and delete operations for the `Car` and `Customer` entities through browser forms.
+The Car Dealership Management System (CDMS) is a web-based platform for managing the core operations of a car dealership: vehicle inventory, customer records, employee records, and sales transactions. It also models Rwanda's full administrative location hierarchy (Province → District → Sector → Cell → Village).
 
 ## Problem Statement
 
-Dealership records are often kept in spreadsheets or paper files, making it difficult to avoid duplicates, find current information, and keep updates consistent. The system provides one validated interface for managing the core records.
+Small and mid-sized dealerships in Rwanda typically track inventory, customers, and sales using spreadsheets or paper records. This leads to duplicate customer entries, no single source of truth for stock levels, inconsistent location data, and no reliable way to trace which employee closed which sale.
 
 ## Scope
 
-The first phase covers car and customer registration, listing, editing, deletion, input validation, and PostgreSQL persistence. Authentication, sales contracts, payments, reporting, and deployment to a public server are outside this phase.
+**In scope:** car inventory CRUD, customer/employee records linked to a location hierarchy, sales linking a customer + employee + one or more cars, validation at UI/business-logic/database level.
+
+**Out of scope:** payment gateway integration, inventory forecasting, multi-dealership management.
 
 ## AS-IS Model
 
-1. Staff record car and customer information manually or in separate files.
-2. Searching and updating records is slow.
-3. Invalid values and duplicate customer emails may be entered.
-4. There is no single workflow for maintaining both record types.
+```mermaid
+flowchart LR
+    A["Customer visits\ndealership"] --> B["Staff checks\npaper/Excel stock list"]
+    B --> C["Staff manually records\ncustomer details (free text)"]
+    C --> D["Sale written on\npaper receipt"]
+    D --> E["Manager manually\ncross-checks sheets"]
+```
 
 ## TO-BE Model
 
-1. Staff open the JSF web application in a browser.
-2. Staff submit validated car or customer forms.
-3. Hibernate persists changes to PostgreSQL.
-4. Staff can list, edit, and delete current records from the same interface.
+```mermaid
+flowchart LR
+    A["Customer inquiry\nlogged in CDMS"] --> B["Staff queries live\ncar inventory"]
+    B --> C["Customer record\nvalidated + linked\nto Location"]
+    C --> D["Sale recorded:\ncustomer + employee + car(s)"]
+    D --> E["Reports generated\ndirectly from DB"]
+```
 
 ## Business Requirements
 
-- The system shall create, list, update, and delete cars.
-- The system shall create, list, update, and delete customers.
-- Car brand, model, year, and price shall be validated.
-- Customer name and email shall be validated; email shall be unique.
-- The system shall persist data in PostgreSQL through Hibernate/JPA.
-- The interface shall provide external, internal, and inline CSS examples.
+- BR1: The system shall create, list, update, and delete cars.
+- BR2: The system shall create, list, update, and delete customers, each linked to a location.
+- BR3: The system shall create, list, update, and delete employees, each linked to a location.
+- BR4: The system shall record a sale linking one customer, one employee, and one or more cars.
+- BR5: Car brand/model/year/price and customer name/email shall be validated; email shall be unique.
+- BR6: The system shall persist data in PostgreSQL through Hibernate/JPA.
+- BR7: The system shall filter customers/employees by location or province.
+- BR8: The interface shall demonstrate external, internal, and inline CSS.
 
 ## Software Qualities
 
-- Usability: simple forms, field-level messages, and navigation between modules.
-- Reliability: transaction rollback and entity constraints protect persistence operations.
-- Maintainability: model, DAO, bean, and view responsibilities are separated.
-- Security: server-side validation remains authoritative; database credentials should be supplied through deployment configuration before production use.
-- Performance: list queries load only the records needed by each page.
-- Portability: Maven builds a standard WAR for a Java web container.
-- Testability: persistence access is isolated in DAO classes.
+- **Usability** — simple forms, field-level messages
+- **Reliability** — transaction rollback, entity constraints
+- **Maintainability** — model / DAO / bean / view separation
+- **Security** — server-side validation authoritative; credentials never committed
+- **Performance** — list queries load only what each page needs
+- **Portability** — Maven WAR for any Servlet 4-compatible container
+- **Testability** — persistence isolated in DAO classes
 
 ## Initial Class Diagram
 
 ```mermaid
 classDiagram
+    class Location {
+        UUID id
+        String name
+        Enum type
+        Location parent
+    }
+    class Customer {
+        UUID id
+        String firstName
+        String lastName
+        String email
+        String phoneNumber
+        Location location
+    }
+    class Employee {
+        UUID id
+        String firstName
+        String lastName
+        String email
+        Location location
+    }
     class Car {
-        Long id
+        UUID id
         String brand
         String model
         int year
         BigDecimal price
     }
-    class Customer {
-        Long id
-        String firstName
-        String lastName
-        String email
-        String phoneNumber
+    class Sale {
+        UUID id
+        LocalDate saleDate
+        BigDecimal finalPrice
+        Enum paymentMethod
+        Customer customer
+        Employee employee
+        List~Car~ cars
     }
-    class CarDAO {
-        save(Car)
-        findAll()
-        delete(Long)
-    }
-    class CustomerDAO {
-        save(Customer)
-        findAll()
-        delete(Long)
-    }
-    class CarBean
-    class CustomerBean
-    CarBean --> CarDAO
-    CarDAO --> Car
-    CustomerBean --> CustomerDAO
-    CustomerDAO --> Customer
-    JpaUtil ..> CarDAO
-    JpaUtil ..> CustomerDAO
+    Location "1" --> "0..1" Location : parent
+    Location "1" --> "1..*" Customer
+    Location "1" --> "1..*" Employee
+    Customer "1" --> "1..*" Sale
+    Employee "1" --> "1..*" Sale
+    Car "*" --> "*" Sale
 ```
 
 ## Validation and CSS Evidence
 
-- JSF validation: required fields, `f:validateLongRange` for car year, and `f:validateRegex` for customer email.
-- Bean validation: `@NotBlank`, `@Email`, `@Pattern`, `@Min`, `@Max`, and `@DecimalMin` on entities.
-- Client-side validation: JavaScript checks the car year and customer email before submit.
-- External CSS: `src/main/webapp/resources/css/style.css`.
-- Internal CSS: the `<style>` block in each XHTML page.
-- Inline CSS: the heading style in each XHTML page.
+- JSF validation: `required`, `f:validateLongRange` (car year), `f:validateRegex` (customer email)
+- Bean Validation: `@NotBlank`, `@Email`, `@Pattern`, `@Min`, `@Max`, `@DecimalMin` on entities
+- Client-side JS: validates car year and customer phone before submit
+- External CSS: `src/main/webapp/resources/css/styles.css`
+- Internal CSS: `<style>` block in each XHTML page
+- Inline CSS: heading `style` attribute in each XHTML page
+
+## Practical Implementation
+
+Entities chosen for full CRUD via JSF + Hibernate: **Car** and **Customer**.
 
 ## Links Required For Submission
 
-- GitHub source link: **REPLACE WITH PUBLIC GITHUB URL**
-- Google Meet/Google Vids recording link: **REPLACE WITH 5-10 MINUTE VIDEO URL**
+- GitHub source: https://github.com/mukunzijonathan/car-dealership
+- Video walkthrough: **REPLACE WITH VIDEO URL**
 
-## Running In VS Code
+## Running Locally
 
-### Prerequisites
-
-- JDK 8 or later, with `JAVA_HOME` configured.
-- Maven 3.8 or later.
-- PostgreSQL running locally.
-- Apache Tomcat 9 (Servlet 4 compatible).
-
-### Database
-
-Create the database before first launch:
+**Prerequisites:** JDK 8+, Maven 3.8+, PostgreSQL, Apache Tomcat/TomEE 9 (Servlet 4).
 
 ```sql
 CREATE DATABASE car_dealership;
 ```
 
-Update the username and password in `src/main/resources/META-INF/persistence.xml` if your PostgreSQL credentials differ. Hibernate is configured with `hbm2ddl.auto=update`, so it creates or updates the `cars` and `customers` tables.
-
-### Build and deploy
-
-Run in the VS Code terminal from the project root:
+Copy `src/main/resources/META-INF/persistence.xml.example` → `persistence.xml`, fill in your local credentials (this file is gitignored — never commit real credentials).
 
 ```bash
 mvn clean package
 ```
-
-Copy `target/ProductManager-1.0-SNAPSHOT.war` into Tomcat's `webapps` directory, start Tomcat, then open:
-
-- `http://localhost:8080/ProductManager-1.0-SNAPSHOT/cars.xhtml`
-- `http://localhost:8080/ProductManager-1.0-SNAPSHOT/customers.xhtml`
-
-In VS Code, the Extension Pack for Java is useful for editing and Maven support. A Tomcat extension can start and deploy the generated WAR, or Tomcat can be started with its `bin/startup.sh` script.
-
-## Submission Archive
-
-Rename the final archive using the requested format, for example:
-
-`23000_first_name_last_name_assignment_3.zip`
-
-Include this documentation, the project source, the generated WAR or a zipped project copy, and the completed public GitHub and video links.
