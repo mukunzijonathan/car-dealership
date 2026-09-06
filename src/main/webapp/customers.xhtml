@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+  <title>Customers</title>
+  <h:outputStylesheet library="css" name="style.css"/>
+  <style>
+    table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    .error { color: #c0392b; font-size: 0.85em; }
+  </style>
+</h:head>
+<h:body>
+  <h2 style="color:#2c3e50;">Customers</h2>
+
+  <h:form id="customerForm" onsubmit="return validateCustomerForm();">
+    <h:messages globalOnly="true" styleClass="error"/>
+
+    <p>First Name:
+      <h:inputText id="firstName" value="#{customerBean.customer.firstName}" required="true"
+                   requiredMessage="First name cannot be empty"/>
+      <h:message for="firstName" styleClass="error"/>
+    </p>
+    <p>Last Name:
+      <h:inputText id="lastName" value="#{customerBean.customer.lastName}" required="true"
+                   requiredMessage="Last name cannot be empty"/>
+      <h:message for="lastName" styleClass="error"/>
+    </p>
+    <p>Email:
+      <h:inputText id="email" value="#{customerBean.customer.email}" required="true">
+        <f:validateRegex pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$"/>
+      </h:inputText>
+      <h:message for="email" styleClass="error"/>
+    </p>
+    <p>Phone:
+      <h:inputText id="phone" value="#{customerBean.customer.phoneNumber}" required="true"/>
+      <h:message for="phone" styleClass="error"/>
+    </p>
+
+    <h:commandButton value="Save" action="#{customerBean.save}"/>
+  </h:form>
+
+  <h:dataTable value="#{customerBean.customers}" var="c">
+    <h:column><f:facet name="header">First Name</f:facet>#{c.firstName}</h:column>
+    <h:column><f:facet name="header">Last Name</f:facet>#{c.lastName}</h:column>
+    <h:column><f:facet name="header">Email</f:facet>#{c.email}</h:column>
+    <h:column><f:facet name="header">Phone</f:facet>#{c.phoneNumber}</h:column>
+    <h:column>
+      <h:form>
+        <h:commandButton value="Edit" action="#{customerBean.edit(c)}"/>
+        <h:commandButton value="Delete" action="#{customerBean.delete(c.id)}"/>
+      </h:form>
+    </h:column>
+  </h:dataTable>
+
+  <script>
+    //<![CDATA[
+    function validateCustomerForm() {
+      var phone = document.getElementById('customerForm:phone').value;
+      if (phone && (phone.length < 9 || phone.length > 15)) {
+        alert('Phone must be 9 to 15 digits');
+        return false;
+      }
+      return true;
+    }
+    //]]>
+  </script>
+</h:body>
+</html>

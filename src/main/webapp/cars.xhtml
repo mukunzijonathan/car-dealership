@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+  <title>Cars</title>
+  <h:outputStylesheet library="css" name="style.css"/>
+  <style>
+    table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    .error { color: #c0392b; font-size: 0.85em; }
+  </style>
+</h:head>
+<h:body>
+  <h2 style="color:#2c3e50;">Car Inventory</h2>
+
+  <h:form id="carForm" onsubmit="return validateCarForm();">
+    <h:messages globalOnly="true" styleClass="error"/>
+
+    <p>Brand:
+      <h:inputText id="brand" value="#{carBean.car.brand}" required="true"
+                   requiredMessage="Brand cannot be empty"/>
+      <h:message for="brand" styleClass="error"/>
+    </p>
+    <p>Model:
+      <h:inputText id="model" value="#{carBean.car.model}" required="true"
+                   requiredMessage="Model cannot be empty"/>
+      <h:message for="model" styleClass="error"/>
+    </p>
+    <p>Year:
+      <h:inputText id="year" value="#{carBean.car.year}" required="true">
+        <f:validateLongRange minimum="1980" maximum="2027"/>
+      </h:inputText>
+      <h:message for="year" styleClass="error"/>
+    </p>
+    <p>Price:
+      <h:inputText id="price" value="#{carBean.car.price}" required="true"/>
+      <h:message for="price" styleClass="error"/>
+    </p>
+
+    <h:commandButton value="Save" action="#{carBean.save}"/>
+  </h:form>
+
+  <h:dataTable value="#{carBean.cars}" var="c">
+    <h:column><f:facet name="header">Brand</f:facet>#{c.brand}</h:column>
+    <h:column><f:facet name="header">Model</f:facet>#{c.model}</h:column>
+    <h:column><f:facet name="header">Year</f:facet>#{c.year}</h:column>
+    <h:column><f:facet name="header">Price</f:facet>#{c.price}</h:column>
+    <h:column>
+      <h:form>
+        <h:commandButton value="Edit" action="#{carBean.edit(c)}"/>
+        <h:commandButton value="Delete" action="#{carBean.delete(c.id)}"/>
+      </h:form>
+    </h:column>
+  </h:dataTable>
+
+  <script>
+    //<![CDATA[
+    function validateCarForm() {
+      var year = document.getElementById('carForm:year').value;
+      if (year && (year < 1980 || year > 2027)) {
+        alert('Year must be between 1980 and 2027');
+        return false;
+      }
+      return true;
+    }
+    //]]>
+  </script>
+</h:body>
+</html>
