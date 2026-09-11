@@ -1,0 +1,43 @@
+@startuml
+!pragma layout smetana
+hide circle
+hide members
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 190
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 13
+skinparam nodesep 45
+skinparam ranksep 60
+skinparam ArrowColor #1F3864
+skinparam ArrowFontColor #1F3864
+skinparam ArrowThickness 1.6
+skinparam class {
+  BackgroundColor #E8EEF7
+  BorderColor #1F3864
+  BorderThickness 1.2
+  FontColor #14243F
+  FontStyle bold
+}
+skinparam titleFontSize 18
+skinparam titleFontColor #14243F
+
+title UML Notation Key — decomposition and generalization as applied in CDMS
+
+class "Customer" as C1
+class "Sale" as S1
+C1 "  1..1  " -- "  0..*  " S1 : 1. Association — plain line ("has-a")
+
+class "Province" as P2
+class "District" as D2
+P2 "  1..1  " o-- "  0..*  " D2 : 2. Aggregation — hollow diamond (weak "has-a")
+
+class "Sale" as S3
+class "SaleItem" as I3
+S3 "  1..1  " *-- "  1..*  " I3 : 3. Composition — filled diamond (strong "has-a")
+
+class "Person" as PR4
+class "Employee" as E4
+PR4 <|-- E4 : 4. Generalization — hollow triangle ("is-a")
+
+@enduml

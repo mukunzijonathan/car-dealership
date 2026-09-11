@@ -1,0 +1,173 @@
+@startuml
+!pragma layout smetana
+hide circle
+skinparam classAttributeIconSize 0
+skinparam dpi 200
+skinparam shadowing false
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 13
+skinparam nodesep 70
+skinparam ranksep 95
+skinparam ArrowColor #1F3864
+skinparam ArrowThickness 1.6
+skinparam ArrowFontColor #1F3864
+skinparam ArrowFontSize 12
+skinparam class {
+  BackgroundColor #E8EEF7
+  BorderColor #1F3864
+  BorderThickness 1.2
+  FontColor #14243F
+  FontStyle bold
+  AttributeFontColor #14243F
+  AttributeFontSize 12
+  AttributeFontName DejaVu Sans
+}
+skinparam enum {
+  BackgroundColor #FDF3E3
+  BorderColor #8A5A00
+  FontColor #6B4500
+}
+skinparam titleFontSize 20
+skinparam titleFontColor #14243F
+
+title CDMS — Initial Class Diagram (Domain Model)
+
+abstract class Person {
+  # id : Long
+  # firstName : String
+  # lastName : String
+  # email : String
+  # phoneNumber : String
+  --
+  + getFullName() : String
+  + getEmail() : String
+  + setEmail(email : String) : void
+  # isContactValid() : boolean
+}
+
+class Customer {
+  - registeredOn : LocalDate
+  - creditLimit : BigDecimal
+  --
+  + getPurchaseHistory() : List<Sale>
+  + getTotalSpent() : BigDecimal
+  + isWithinCreditLimit(amount : BigDecimal) : boolean
+}
+
+class Employee {
+  - employeeNumber : String
+  - hireDate : LocalDate
+  - role : EmployeeRole
+  - salary : BigDecimal
+  --
+  + recordSale(sale : Sale) : void
+  + getSalesTotal(month : int) : BigDecimal
+  + isManager() : boolean
+}
+
+class Location {
+  - id : Long
+  - name : String
+  - code : String
+  - type : LocationType
+  --
+  + getFullPath() : String
+  + addChild(child : Location) : void
+  + getChildren() : List<Location>
+}
+
+class Car {
+  - id : Long
+  - vin : String
+  - brand : String
+  - model : String
+  - year : int
+  - price : BigDecimal
+  - status : CarStatus
+  --
+  + getDescription() : String
+  + isAvailable() : boolean
+  + markAsSold() : void
+}
+
+class Sale {
+  - id : Long
+  - saleDate : LocalDate
+  - paymentMethod : PaymentMethod
+  - discount : BigDecimal
+  --
+  + addItem(car : Car, price : BigDecimal) : void
+  + removeItem(item : SaleItem) : void
+  + getTotalAmount() : BigDecimal
+}
+
+class SaleItem {
+  - id : Long
+  - agreedPrice : BigDecimal
+  - quantity : int
+  --
+  + getLineTotal() : BigDecimal
+}
+
+class Invoice {
+  - id : Long
+  - invoiceNumber : String
+  - issuedOn : LocalDate
+  - amountDue : BigDecimal
+  - settled : boolean
+  --
+  + markAsSettled() : void
+  + isOverdue(today : LocalDate) : boolean
+}
+
+enum LocationType {
+  PROVINCE
+  DISTRICT
+  SECTOR
+  CELL
+  VILLAGE
+}
+
+enum CarStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  MOBILE_MONEY
+  CREDIT
+}
+
+enum EmployeeRole {
+  SALES_AGENT
+  MANAGER
+  ADMIN
+}
+
+' ---------- Generalization (hollow triangle) ----------
+Person <|-- Customer
+Person <|-- Employee
+
+' ---------- Aggregation (hollow diamond, weak has-a) ----------
+Location "  0..1  " o-- "  0..*  " Location : parent / children >
+
+' ---------- Association (plain line) ----------
+Location "  1..1  " -- "  0..*  " Person : resides at <
+Customer "  1..1  " -- "  0..*  " Sale : places >
+Employee "  1..1  " -- "  0..*  " Sale : handles >
+Car "  1..1  " -- "  0..*  " SaleItem : sold as >
+
+' ---------- Composition (filled diamond, strong has-a) ----------
+Sale "  1..1  " *-- "  1..*  " SaleItem : contains >
+Sale "  1..1  " *-- "  1..1  " Invoice : issues >
+
+' ---------- Enumeration usage ----------
+Location ..> LocationType : <<uses>>
+Car ..> CarStatus : <<uses>>
+Sale ..> PaymentMethod : <<uses>>
+Employee ..> EmployeeRole : <<uses>>
+
+@enduml
