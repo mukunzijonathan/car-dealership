@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>CDMS — Kigali Showroom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/app.css"/>
+</head>
+<body>
+  <div class="app">
+    <aside class="side">
+      <div class="brand">
+        <div class="mark">C</div>
+        <div>
+          <h1>CDMS</h1>
+          <p>Kigali showroom</p>
+        </div>
+      </div>
+      <nav>
+        <a href="#/dashboard" data-route="dashboard">Dashboard</a>
+        <a href="#/cars" data-route="cars">Inventory</a>
+        <a href="#/customers" data-route="customers">Customers</a>
+        <a href="#/employees" data-route="employees">Staff</a>
+      </nav>
+      <p class="note">Assignment 4 — Spring Boot REST. Three entities with business-rule validation. Open this UI after starting the API on port 8080.</p>
+    </aside>
+
+    <main class="main">
+      <div class="top">
+        <div>
+          <h2 id="page-title">Dashboard</h2>
+          <p class="lede" id="page-lede">Live stock, customers and staff from the REST API.</p>
+        </div>
+        <button class="btn btn-primary hidden" id="new-btn">New record</button>
+      </div>
+
+      <section id="view-dashboard"></section>
+      <section id="view-list" class="hidden"></section>
+      <section id="view-form" class="hidden">
+        <div class="panel">
+          <p class="banner" id="form-error"></p>
+          <form id="entity-form" class="form-grid"></form>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="/js/app.js"></script>
+</body>
+</html>

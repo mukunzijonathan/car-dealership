@@ -1,0 +1,214 @@
+/* Design tokens — CDMS "Showroom Night"
+   Warm copper on charcoal, cream paper surfaces. Not a generic purple dashboard. */
+:root {
+  --ink: #14110e;
+  --ink-soft: #3b342c;
+  --paper: #f4efe6;
+  --paper-2: #ebe3d4;
+  --line: #d7ccb8;
+  --copper: #c46b3a;
+  --copper-deep: #9a4e28;
+  --forest: #1f3d32;
+  --forest-2: #2d5a48;
+  --sold: #8b3a2f;
+  --reserved: #b07a2a;
+  --ok: #2d5a48;
+  --danger: #8b3a2f;
+  --white: #fffaf3;
+  --shadow: 0 18px 40px rgba(20, 17, 14, 0.12);
+  --radius: 18px;
+  --sidebar: 260px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  font-family: "Outfit", system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 500px at 90% -10%, #e8d5b8 0%, transparent 55%),
+    var(--paper);
+}
+
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar) 1fr;
+  min-height: 100vh;
+}
+
+.side {
+  background: linear-gradient(180deg, var(--ink) 0%, #221c17 100%);
+  color: var(--paper);
+  padding: 28px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.mark {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  background: var(--copper);
+  display: grid; place-items: center;
+  font-family: "Fraunces", serif;
+  font-weight: 700;
+  color: var(--white);
+}
+.brand h1 {
+  font-family: "Fraunces", serif;
+  font-size: 1.15rem;
+  margin: 0;
+  font-weight: 600;
+}
+.brand p { margin: 2px 0 0; font-size: 0.75rem; color: #cbbba6; letter-spacing: 0.08em; text-transform: uppercase; }
+
+nav { display: flex; flex-direction: column; gap: 6px; }
+nav a {
+  color: #d8cbb8;
+  text-decoration: none;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+nav a.active, nav a:hover { background: #2a231d; color: var(--white); }
+.side .note {
+  margin-top: auto;
+  font-size: 0.8rem;
+  color: #b8a894;
+  line-height: 1.45;
+}
+
+.main { padding: 28px 36px 48px; }
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 28px;
+  gap: 16px;
+}
+.top h2 {
+  font-family: "Fraunces", serif;
+  font-size: 2rem;
+  margin: 0;
+  font-weight: 500;
+}
+.top .lede { margin: 6px 0 0; color: var(--ink-soft); }
+
+.btn {
+  border: 0;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 11px 18px;
+  font-weight: 600;
+  font-family: inherit;
+}
+.btn-primary { background: var(--copper); color: white; }
+.btn-primary:hover { background: var(--copper-deep); }
+.btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn-danger { background: var(--danger); color: white; }
+.btn.small { padding: 7px 12px; font-size: 0.85rem; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.stat {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+}
+.stat span { display: block; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.stat strong {
+  display: block;
+  margin-top: 8px;
+  font-family: "Fraunces", serif;
+  font-size: 1.8rem;
+  font-weight: 500;
+}
+
+.panel {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+th { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); background: var(--paper-2); }
+tr:last-child td { border-bottom: 0; }
+.actions { display: flex; gap: 8px; }
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.AVAILABLE { background: #dceadf; color: var(--ok); }
+.RESERVED { background: #f3e4c4; color: var(--reserved); }
+.SOLD { background: #f0d6d1; color: var(--sold); }
+.ADMIN { background: #ead9c8; color: var(--copper-deep); }
+.MANAGER { background: #dceadf; color: var(--ok); }
+.SALES_AGENT { background: #e8e3f0; color: #4a3f63; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 24px;
+}
+label { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; font-weight: 600; }
+input, select {
+  font: inherit;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+.form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+.banner {
+  margin: 0 24px 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f0d6d1;
+  color: var(--danger);
+  display: none;
+}
+.banner.show { display: block; }
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 16px;
+  border-radius: 12px;
+  display: none;
+}
+.hidden { display: none; }
+.empty { padding: 40px; text-align: center; color: var(--ink-soft); }
+
+@media (max-width: 980px) {
+  .app { grid-template-columns: 1fr; }
+  .side { flex-direction: row; align-items: center; }
+  nav { flex-direction: row; flex-wrap: wrap; }
+  .side .note { display: none; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}
