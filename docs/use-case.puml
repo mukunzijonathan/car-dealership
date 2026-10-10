@@ -1,0 +1,22 @@
+@startuml
+left to right direction
+title CDMS — use cases
+
+actor Visitor
+actor Customer
+actor "Sales agent" as Agent
+actor Manager
+actor Admin
+actor "Mail / SMS" as Broker
+
+Visitor --> (Browse available cars)
+Visitor --> (Create customer account)
+Customer --> (Sign in)
+Customer --> (Request a car)
+Agent --> (Accept or reject request)
+Manager --> (View stock and sales)
+Admin --> (Create staff login)
+Admin --> (Manage inventory)
+(Accept or reject request) --> (Notify customer) : <<include>>
+Broker --> (Notify customer)
+@enduml

@@ -1,0 +1,258 @@
+{
+  "info": {
+    "name": "CDMS — Car Dealership",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Dummy requests for local CDMS. Run Login admin first so {{token}} is set."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" },
+    { "key": "carId", "value": "" },
+    { "key": "saleId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login admin",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const j = pm.response.json();",
+                "if (j.token) pm.collectionVariables.set('token', j.token);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@cdms.rw\",\n  \"password\": \"Admin#123\"\n}" },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Login customer",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const j = pm.response.json();",
+                "if (j.token) pm.collectionVariables.set('token', j.token);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"customer@cdms.rw\",\n  \"password\": \"Customer#123\"\n}" },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Login agent",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const j = pm.response.json();",
+                "if (j.token) pm.collectionVariables.set('token', j.token);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"agent@cdms.rw\",\n  \"password\": \"Agent#123\"\n}" },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Register customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Patrick\",\n  \"lastName\": \"Habimana\",\n  \"email\": \"patrick.habimana@gmail.com\",\n  \"phoneNumber\": \"+250788333444\",\n  \"password\": \"Patrick#123\"\n}" },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cars",
+      "item": [
+        {
+          "name": "Search available (public)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const rows = pm.response.json();",
+                "if (Array.isArray(rows) && rows[0]) pm.collectionVariables.set('carId', rows[0].id);"
+              ]
+            }
+          }],
+          "request": { "method": "GET", "url": "{{baseUrl}}/car/search-available" }
+        },
+        {
+          "name": "Search all",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/car/search-all"
+          }
+        },
+        {
+          "name": "Create car",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"vin\": \"1N4AL3AP7DC123456\",\n  \"brand\": \"Mazda\",\n  \"model\": \"CX-5\",\n  \"manufactureYear\": 2023,\n  \"price\": 32000000,\n  \"status\": \"AVAILABLE\",\n  \"imageFile\": \"landcruiser.jpg\"\n}" },
+            "url": "{{baseUrl}}/car/create"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Search all",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/customer/search-all"
+          }
+        },
+        {
+          "name": "Create customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Diane\",\n  \"lastName\": \"Uwimana\",\n  \"email\": \"diane.uwimana@gmail.com\",\n  \"phoneNumber\": \"+250788555666\",\n  \"creditLimit\": 40000000\n}" },
+            "url": "{{baseUrl}}/customer/create"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Staff",
+      "item": [
+        {
+          "name": "Search all",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/employee/search-all"
+          }
+        },
+        {
+          "name": "Create staff with portal login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Bosco\",\n  \"lastName\": \"Mugisha\",\n  \"email\": \"bosco.mugisha@cdms.rw\",\n  \"phoneNumber\": \"+250788777888\",\n  \"employeeNumber\": \"EMP-0004\",\n  \"hireDate\": \"2024-02-01\",\n  \"role\": \"SALES_AGENT\",\n  \"salary\": 480000,\n  \"portalPassword\": \"Bosco#1234\"\n}" },
+            "url": "{{baseUrl}}/employee/create"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sales",
+      "item": [
+        {
+          "name": "Request car (customer token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"car\": { \"id\": \"{{carId}}\" },\n  \"notes\": \"I can visit the showroom on Saturday\"\n}" },
+            "url": "{{baseUrl}}/sale/request"
+          }
+        },
+        {
+          "name": "My requests (customer)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/sale/mine"
+          }
+        },
+        {
+          "name": "Pending (staff)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const rows = pm.response.json();",
+                "if (Array.isArray(rows) && rows[0]) pm.collectionVariables.set('saleId', rows[0].id);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/sale/pending"
+          }
+        },
+        {
+          "name": "Approve (staff)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/sale/approve/{{saleId}}"
+          }
+        },
+        {
+          "name": "Reject (staff)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/sale/reject/{{saleId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mongo documents",
+      "item": [
+        {
+          "name": "Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/notification/search-all"
+          }
+        },
+        {
+          "name": "Audit log",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/notification/audit/search-all"
+          }
+        }
+      ]
+    }
+  ]
+}

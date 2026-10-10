@@ -33,3 +33,6 @@ build/
 .vscode/
 
 .~lock.*#
+
+frontend/node_modules/
+frontend/dist/

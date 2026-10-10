@@ -1,0 +1,67 @@
+@startuml
+title CDMS — physical schema (PostgreSQL + MongoDB)
+
+entity "app_users" as users {
+  * id : uuid <<PK>>
+  --
+  * email : varchar <<UQ>>
+  password_hash : varchar
+  * full_name : varchar
+  * role : varchar
+  * provider : varchar
+}
+
+entity "car" as car {
+  * id : uuid <<PK>>
+  --
+  * vin : char(17) <<UQ>>
+  * brand : varchar
+  * model : varchar
+  * manufacture_year : int
+  * price : float
+  * status : varchar
+  image_file : varchar
+}
+
+entity "customer" as customer {
+  * id : uuid <<PK>>
+  --
+  * email : varchar <<UQ>>
+  * first_name : varchar
+  * last_name : varchar
+  * phone_number : varchar
+  * credit_limit : float
+  * registered_on : date
+}
+
+entity "employee" as employee {
+  * id : uuid <<PK>>
+  --
+  * email : varchar <<UQ>>
+  * employee_number : varchar <<UQ>>
+  * role : varchar
+  * salary : float
+  * hire_date : date
+}
+
+entity "sale" as sale {
+  * id : uuid <<PK>>
+  --
+  * car_id : uuid <<FK,UQ>>
+  * customer_id : uuid <<FK>>
+  employee_id : uuid <<FK>>
+  * amount : float
+  sold_on : date
+  * status : varchar
+}
+
+customer ||--o{ sale
+employee |o--o{ sale
+car ||--o| sale
+
+note as mongo
+  MongoDB collections (no FK):
+  notifications(id, channel, recipient, relatedSaleId)
+  audit_logs(id, action, actorEmail, relatedSaleId)
+end note
+@enduml
