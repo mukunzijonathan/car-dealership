@@ -1,7 +1,7 @@
-# 1. Requirements (CDMS)
+# Requirements — CDMS
 
 MUKUNZI Jonathan — 27132  
-Web Technology final project, 2026-2027
+INSY 8322 Web Technology
 
 ## Problem statement
 
@@ -12,55 +12,53 @@ A Kigali car showroom still tracks stock, buyers and sales in notebooks or sprea
 | Actor | Goal |
 | --- | --- |
 | Visitor | Browse available cars without an account |
-| Customer | Create an account, request a car |
+| Customer | Create an account and request a car |
 | Sales agent | Accept or reject a customer request |
-| Manager | Watch stock, customers and sales |
-| Admin | Create staff portal accounts and manage the lot |
+| Manager | Supervise stock, customers and sales |
+| Administrator | Create staff portal accounts and manage the lot |
 
 ## Objectives
 
 - Record every car, customer, employee and sale request.
-- Stop a sold or reserved car from being sold twice.
+- Prevent a reserved or sold car from being sold twice.
 - Restrict screens and APIs by role (RBAC).
-- After a sale is approved, notify the customer (email/SMS via RabbitMQ) and keep the message in MongoDB.
+- After a sale is approved, notify the customer through RabbitMQ and persist the message in MongoDB.
 
 ## Scope
 
-**In:** inventory, customer self-register, staff created by admin, request/approve sale, JWT login, PostgreSQL + MongoDB + RabbitMQ, React UI on localhost.
+**In scope:** inventory, customer self-registration, staff created by an administrator, sale request and approval, JWT and OAuth 2.0, PostgreSQL, MongoDB, RabbitMQ, React user interface.
 
-**Out:** native mobile apps, real mobile-money payment, OTP codes, production hosting (unless the DevOps bonus is finished).
-
-**Authentication (item 6):** customers create an account with email and password (or Google OAuth2). Login returns a JWT. The brief asks for OAuth2, not OTP. Welcome email/SMS after register go through RabbitMQ into MongoDB. They are stored documents, not a one-time login code.
+**Out of scope:** native mobile applications, live payment, and public-cloud hosting.
 
 ## Functional / business rules
 
 - VIN is unique and exactly 17 characters.
-- A customer may request only an AVAILABLE car; it becomes RESERVED.
-- Only staff can approve; then the car is SOLD and a RabbitMQ event is published.
-- Rejected requests put the car back to AVAILABLE.
-- Last ADMIN cannot be deleted.
-- Manager/Admin salary ≥ RWF 500,000.
+- A customer may request only an available car; it becomes reserved.
+- Only staff can approve; the car is then sold and a RabbitMQ event is published.
+- A rejected request returns the car to available.
+- The last administrator cannot be deleted.
+- Manager and administrator salary is at least RWF 500,000.
 - Customers cannot create staff accounts.
 
 ## Quality attributes
 
 | Attribute | Measure |
 | --- | --- |
-| Usability | Landing, login and showroom usable on a laptop browser without horizontal scroll |
-| Performance | List endpoints return in under 2s on localhost with seed data |
-| Reliability | Sale request and approve run in a database transaction |
-| Security | JWT on protected routes; RBAC; passwords stored with BCrypt |
+| Usability | Landing, login and showroom usable on a laptop without horizontal scroll |
+| Performance | List endpoints return in under two seconds on localhost with seed data |
+| Reliability | Sale request and approval run in a database transaction |
+| Security | JWT on protected routes; RBAC; BCrypt passwords; OAuth 2.0 with Google |
 
 ## User stories
 
 **US-1 — Browse**  
-As a visitor I can see available cars on the home page so I know what is on the lot.  
-**Acceptance:** `GET /car/search-available` works without a token; photos and price are shown.
+As a visitor I can see cars on the home page so I know what is on the lot.  
+**Acceptance:** public car-list endpoints work without a token; photographs and prices are shown.
 
 **US-2 — Request**  
 As a registered customer I request a car so a sales agent can complete the sale.  
-**Acceptance:** car status becomes RESERVED; a `sale` row exists with status REQUESTED; I see it under My requests.
+**Acceptance:** car status becomes RESERVED; a sale row exists with status REQUESTED; I see it under My requests.
 
 **US-3 — Approve**  
 As a sales agent I accept a request so the car is marked sold and the customer is notified.  
-**Acceptance:** status APPROVED / SOLD; MongoDB notification documents appear; RabbitMQ queues `cdms.notification.email` and `cdms.notification.sms` receive the event.
+**Acceptance:** status APPROVED / SOLD; MongoDB notification documents appear; RabbitMQ email and SMS queues receive the event.

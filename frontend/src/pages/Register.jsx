@@ -49,7 +49,7 @@ export default function Register() {
             </div>
           </label>
           <button className="btn btn-primary" type="submit">Create account</button>
-          <p className="note">No OTP. After you register, RabbitMQ writes a welcome email and SMS document into MongoDB. Staff accounts are created only by an admin.</p>
+          <p className="note">A welcome notification is stored after registration. Staff accounts are created only by an administrator.</p>
           <Link className="btn btn-ghost" to="/login">Already have an account? Sign in</Link>
         </form>
       </div>

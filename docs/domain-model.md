@@ -1,56 +1,46 @@
-# 2. Domain and data modeling
+# Domain and data modeling — CDMS
 
-## 2b. Conceptual model (no tables yet)
+## Conceptual model
 
-**Actors:** Visitor, Customer, Sales agent, Manager, Admin, Notification service (email/SMS).
+**Actors:** visitor, customer, sales agent, manager, administrator, notification service.
 
-**Processes:** browse stock → register/login → request sale → staff accept/reject → notify customer.
+**Processes:** browse stock → register or sign in → request a sale → staff accept or reject → notify the customer.
 
-**Data objects:** Person, Car, Sale, User account, Role, Notification document, Audit event.
+**Data objects:** Person, Car, Sale, user account, role, notification document, audit event.
 
-- A **Person** is either a **Customer** or an **Employee**.
-- An **AppUser** is the login (email + password + role).
-- A **Sale** links one Car, one Customer, and (after approval) one Employee.
-- **Notification** and **AuditLog** are documents, not rows you join.
+- A person is either a customer or an employee.
+- An application user is the login identity (email, credential, role, provider).
+- A sale links one car, one customer, and after approval one employee.
+- Notification and audit records are documents, not relational join tables.
 
-## 2a. UML class diagram
+## Class diagram
 
-See `uml-class.puml`. Open it in IntelliJ PlantUML, or:
+See `uml-class.puml`.
 
-```bash
-# if plantuml is installed
-plantuml docs/uml-class.puml
-```
+- Customer 1 — 0..* Sale  
+- Employee 0..1 — 0..* Sale (absent until approval)  
+- Car 1 — 0..1 Sale  
+- Customer and Employee inherit Person attributes  
 
-Core associations (multiplicity both ends):
+## Physical schema
 
-- Customer 1 — 0..* Sale
-- Employee 0..1 — 0..* Sale (null until approved)
-- Car 1 — 0..1 Sale
-- AppUser 1 — 1 Role
-- Employee / Customer share Person fields (generalization)
+### PostgreSQL (`carDealership`)
 
-## 2c. Technology schema
-
-### PostgreSQL (`carDealership`) — operational data
-
-| Table | PK | Important columns / constraints |
+| Table | Primary key | Constraints |
 | --- | --- | --- |
-| `app_users` | `id` UUID | `email` UNIQUE, `role` (ADMIN, MANAGER, SALES_AGENT, CUSTOMER), `password_hash` |
-| `car` | `id` UUID | `vin` UNIQUE length 17, `status`, `price > 0`, `image_file` |
-| `customer` | `id` UUID | `email` UNIQUE, `credit_limit >= 0` |
-| `employee` | `id` UUID | `employee_number` UNIQUE `EMP-9999`, `role`, `salary` |
-| `sale` | `id` UUID | `car_id` UNIQUE FK, `customer_id` FK, `employee_id` FK nullable, `status`, `sold_on` nullable |
+| `app_users` | `id` UUID | `email` UNIQUE; role enumeration |
+| `car` | `id` UUID | `vin` UNIQUE, length 17; `price > 0` |
+| `customer` | `id` UUID | `email` UNIQUE |
+| `employee` | `id` UUID | `employee_number` UNIQUE; `email` UNIQUE |
+| `sale` | `id` UUID | `car_id` UNIQUE FK; `customer_id` FK; `employee_id` FK nullable |
 
 Indexes: unique on `car.vin`, `customer.email`, `employee.employee_number`, `app_users.email`, `sale.car_id`.
 
-### MongoDB (`cdms_docs`) — documents / operation history
+### MongoDB (`cdms_docs`)
 
-| Collection | Typical fields |
+| Collection | Fields |
 | --- | --- |
 | `notifications` | channel, recipient, subject, message, relatedSaleId, status, createdAt |
 | `audit_logs` | action, actorEmail, details, relatedSaleId, createdAt |
 
-No foreign keys. `relatedSaleId` is the UUID stored as a string.
-
-See `er-schema.puml` for the picture.
+See `er-schema.puml`.

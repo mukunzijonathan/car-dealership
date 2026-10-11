@@ -65,7 +65,7 @@ export default function Login() {
           {googleEnabled ? (
             <a className="btn btn-ghost" href="/oauth2/authorization/google">Continue with Google</a>
           ) : (
-            <p className="note">OAuth2 Google is implemented. Add a Google client ID to enable the button. CDMS does not use OTP — create an account with email and password.</p>
+            <p className="note">Sign in with email and password, or continue with Google when OAuth 2.0 credentials are configured.</p>
           )}
           <Link className="btn btn-ghost" to="/register">Create a customer account</Link>
           <p className="note">Demo accounts — click one to fill the form:</p>

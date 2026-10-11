@@ -36,3 +36,7 @@ build/
 
 frontend/node_modules/
 frontend/dist/
+
+# Local working notes — not part of the submitted project
+docs/REPORT.md
+docs/PROJECT-STATUS.md
