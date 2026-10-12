@@ -1,47 +1,69 @@
-# Car Dealership (Assignment 4)
+# CDMS — Car Dealership Management System
 
-Spring Boot project in the same style as the in-class **stockmanagementsystem**: package-by-feature, `BaseEntity`, service interface + `*ServiceImpl`, Lombok, PostgreSQL, REST mapped as `/entity/create` and `/entity/search-all`.
+MUKUNZI Jonathan — 27132  
+Adventist University of Central Africa — INSY 8322 Web Technology
 
-MUKUNZI Jonathan — 27132
+Web application for a Kigali car showroom. Visitors browse inventory. Customers register and request a car. Staff accept or reject the request. PostgreSQL stores operational data. RabbitMQ carries registration and sale events. MongoDB stores email, SMS and audit documents.
 
-- **GitHub:** `https://github.com/mukunzijonathan/car-dealership`
+**Repository:** https://github.com/mukunzijonathan/car-dealership  
+**Pull request into main:** https://github.com/mukunzijonathan/car-dealership/pull/1  
+**Project documentation:** [docs/CDMS-Project-Documentation.md](docs/CDMS-Project-Documentation.md)
+
+## Layout
+
+```
+backend/           Spring Boot API (port 8080)
+frontend/          React + Vite (port 5173)
+docker-compose.yml MongoDB and RabbitMQ
+docs/              Requirements, models, project documentation
+postman/           API collection
+pics/              Vehicle photographs
+```
+
+## Requirements
+
+- PostgreSQL with database `carDealership`
+- Docker
+- JDK 21 and Maven
+- Node.js 18 or later
 
 ## Run
 
-Create the database, then start the app (same way as class):
-
-```sql
-CREATE DATABASE "carDealership";
+```bash
+docker compose up -d
+cd backend && mvn spring-boot:run
 ```
 
 ```bash
-mvn spring-boot:run
+cd frontend && npm install && npm run dev
 ```
 
-Check `src/main/resources/application.properties` for the PostgreSQL user and password.
+| Service | URL |
+| --- | --- |
+| User interface | http://localhost:5173 |
+| API | http://localhost:8080 |
+| RabbitMQ console | http://localhost:15672 (`guest` / `guest`) |
+| MongoDB | `mongodb://localhost:27017` / `cdms_docs` |
 
-- UI: http://localhost:8080/
-- Postman: `postman/CDMS-Assignment4.postman_collection.json`
+## Demo accounts
 
-## REST (class mapping)
+| Role | Email | Password |
+| --- | --- | --- |
+| Administrator | admin@cdms.rw | Admin#123 |
+| Manager | manager@cdms.rw | Manager#123 |
+| Sales agent | agent@cdms.rw | Agent#123 |
+| Customer | customer@cdms.rw | Customer#123 |
 
-| | Car | Customer | Employee |
-| --- | --- | --- | --- |
-| List | `GET /car/search-all` | `GET /customer/search-all` | `GET /employee/search-all` |
-| One | `GET /car/search-by-id/{id}` | `GET /customer/search-by-id/{id}` | `GET /employee/search-by-id/{id}` |
-| Create | `POST /car/create` | `POST /customer/create` | `POST /employee/create` |
-| Update | `PUT /car/update` | `PUT /customer/update` | `PUT /employee/update` |
-| Delete | `DELETE /car/delete/{id}` | `DELETE /customer/delete/{id}` | `DELETE /employee/delete/{id}` |
+Google OAuth 2.0 uses `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` when those environment variables are set. Redirect URI: `http://localhost:8080/login/oauth2/code/google`.
 
-Business rules live in the service implementation (unique VIN/email, cannot delete a sold car, last ADMIN cannot be removed, manager salary ≥ RWF 500,000).
+## Documentation
 
-## Packages
-
-```
-rw.ac.auca.base              BaseEntity, Person
-rw.ac.auca.car.domain|repository|service
-rw.ac.auca.customer.domain|repository|service
-rw.ac.auca.employee.domain|repository|service
-rw.ac.auca.controller        CarController, CustomerController, EmployeeController
-rw.ac.auca.cardealership     CardealershipApplication
-```
+| Document | Topic |
+| --- | --- |
+| [docs/CDMS-Project-Documentation.md](docs/CDMS-Project-Documentation.md) | Full project report |
+| [docs/requirements.md](docs/requirements.md) | Problem, users, stories |
+| [docs/domain-model.md](docs/domain-model.md) | Conceptual and physical model |
+| [docs/uml-class.puml](docs/uml-class.puml) | Class diagram |
+| [docs/er-schema.puml](docs/er-schema.puml) | Schema |
+| [docs/use-case.puml](docs/use-case.puml) | Use cases |
+| [postman/DUMMY-DATA.md](postman/DUMMY-DATA.md) | API samples |

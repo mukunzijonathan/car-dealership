@@ -1,0 +1,59 @@
+@startuml
+skinparam classAttributeIconSize 0
+title CDMS — conceptual class diagram
+
+abstract class Person {
+  - firstName: String
+  - lastName: String
+  - email: String
+  - phoneNumber: String
+}
+
+class Customer {
+  - creditLimit: Double
+  - registeredOn: Date
+}
+
+class Employee {
+  - employeeNumber: String
+  - hireDate: Date
+  - role: EmployeeRole
+  - salary: Double
+}
+
+class Car {
+  - vin: String
+  - brand: String
+  - model: String
+  - manufactureYear: Integer
+  - price: Double
+  - status: CarStatus
+  - imageFile: String
+}
+
+class Sale {
+  - amount: Double
+  - soldOn: Date
+  - status: SaleStatus
+  - notes: String
+}
+
+class AppUser {
+  - email: String
+  - passwordHash: String
+  - fullName: String
+  - role: Role
+  - provider: String
+}
+
+enum CarStatus { AVAILABLE RESERVED SOLD }
+enum SaleStatus { REQUESTED APPROVED REJECTED }
+enum Role { ADMIN MANAGER SALES_AGENT CUSTOMER }
+
+Person <|-- Customer
+Person <|-- Employee
+Customer "1" --> "0..*" Sale : places
+Employee "0..1" --> "0..*" Sale : approves
+Car "1" --> "0..1" Sale : subject of
+AppUser "1" --> "1" Role : has
+@enduml
