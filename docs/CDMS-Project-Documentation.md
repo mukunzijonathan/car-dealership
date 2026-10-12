@@ -1,19 +1,20 @@
 # Car Dealership Management System (CDMS)
 
-**Student:** MUKUNZI Jonathan  
+**Name:** MUKUNZI Jonathan  
 **Registration number:** 27132  
 **Institution:** Adventist University of Central Africa  
-**Faculty:** Information Technology  
-**Course:** INSY 8322 — Web Technology  
-**Session:** April 2026–2027  
-**Repository:** https://github.com/mukunzijonathan/car-dealership  
-**Pull request:** https://github.com/mukunzijonathan/car-dealership/pull/1
+**Faculty of Information Technology**  
+**Course:** INSY 8322 — Web Technology (April 2026–2027)  
+**Instructor:** Jeremie U. Tuyisenge  
+
+**GitHub:** https://github.com/mukunzijonathan/car-dealership  
+**Pull request into `main`:** https://github.com/mukunzijonathan/car-dealership/pull/1
 
 ---
 
 ## Abstract
 
-CDMS is a web-based system for a Kigali car showroom. Visitors browse inventory without an account. Customers register, sign in, and request a vehicle. Sales staff accept or reject the request. Operational records are stored in PostgreSQL. Sale and registration events travel through RabbitMQ. Email, SMS and audit documents are stored in MongoDB. Access is controlled with JWT authentication, optional Google OAuth 2.0, and role-based authorization.
+I built CDMS as a web system for a Kigali car showroom. A visitor can browse the lot without an account. A customer creates an account, signs in, and requests a car. A sales agent accepts or rejects that request. PostgreSQL holds cars, people and sales. RabbitMQ carries registration and sale events. MongoDB stores the resulting email, SMS and audit documents. Sign-in uses JWT, with Google OAuth 2.0 available in the security layer. Access to screens and APIs is restricted by role.
 
 ---
 
@@ -21,25 +22,24 @@ CDMS is a web-based system for a Kigali car showroom. Visitors browse inventory 
 
 1. Problem, users, objectives and requirements  
 2. Domain and data modeling  
-3. User interface design  
-4. Architecture and backend implementation  
+3. User interface  
+4. Architecture and backend  
 5. Persistence  
 6. Authentication, OAuth 2.0 and RBAC  
-7. Messaging with RabbitMQ  
+7. RabbitMQ  
 8. Version control  
-9. Quality, testing and DevOps  
+9. Testing and DevOps  
 10. How to run the system  
 11. Conclusion  
+12. List of figures  
 
 ---
 
 ## 1. Problem, users, objectives and requirements
 
-*(Mid-term items 1 — 10 marks)*
-
 ### 1.1 Problem statement
 
-A Kigali car showroom still tracks stock, buyers and sales in notebooks or spreadsheets. Duplicate vehicle identification numbers (VIN), a sold car being offered again, and no record of who approved a sale are common. The business needs a single web application that records inventory, customers, staff and sale requests, enforces roles, and keeps an audit trail of completed sales.
+A Kigali car showroom still tracks stock, buyers and sales in notebooks or spreadsheets. Duplicate vehicle identification numbers, a sold car being offered again, and no record of who approved a sale are common. I needed a single web application that records inventory, customers, staff and sale requests, enforces roles, and keeps an audit trail.
 
 ### 1.2 Target users
 
@@ -54,17 +54,17 @@ A Kigali car showroom still tracks stock, buyers and sales in notebooks or sprea
 ### 1.3 Objectives
 
 1. Record every car, customer, employee and sale request.  
-2. Prevent a reserved or sold car from being sold twice.  
+2. Stop a reserved or sold car from being sold twice.  
 3. Restrict screens and APIs by role.  
-4. After a sale is approved, publish a notification event and persist the resulting email, SMS and audit documents.
+4. After a sale is approved, publish a notification event and keep the email, SMS and audit documents.
 
 ### 1.4 Scope
 
-**In scope:** public showroom, customer self-registration, staff accounts created by an administrator, sale request and approval, JWT and OAuth 2.0, PostgreSQL, MongoDB, RabbitMQ, and a React user interface on localhost.
+**In scope:** public showroom, customer self-registration, staff accounts created by an administrator, sale request and approval, JWT and OAuth 2.0, PostgreSQL, MongoDB, RabbitMQ, and a React interface on localhost.
 
-**Out of scope:** native mobile applications, live payment gateways, and production hosting on a public cloud (Docker Compose is used for local infrastructure).
+**Out of scope:** native mobile applications, live payment, and hosting on a public cloud. MongoDB and RabbitMQ run in Docker on this machine.
 
-### 1.5 Functional / business rules
+### 1.5 Business rules
 
 - VIN is unique and exactly 17 characters.  
 - A customer may request only an available car; the car becomes reserved.  
@@ -76,159 +76,78 @@ A Kigali car showroom still tracks stock, buyers and sales in notebooks or sprea
 
 ### 1.6 Quality attributes
 
-| Attribute | Measure |
+| Attribute | How I measured it |
 | --- | --- |
-| Usability | Landing, login and showroom usable on a laptop browser without horizontal scroll; layout adapts below 980px and 600px |
-| Performance | Inventory list endpoints return in under two seconds on localhost with the seed data set |
+| Usability | Landing, login and showroom work on a laptop without horizontal scroll; layout adapts below 980px and 600px |
+| Performance | Inventory lists return in under two seconds on localhost with the seed data |
 | Reliability | Sale request and approval run inside a database transaction |
-| Security | Passwords stored with BCrypt; JWT on protected routes; RBAC on every mutating API; OAuth 2.0 available for Google sign-in |
+| Security | BCrypt passwords, JWT on protected routes, RBAC on mutating APIs, OAuth 2.0 with Google |
 
-### 1.7 User stories and acceptance criteria
+### 1.7 User stories
 
 **US-1 Browse**  
 As a visitor I can see cars on the home page so that I know what is on the lot.  
-**Acceptance:** `GET /car/search-lot` and `GET /car/search-available` succeed without a token; brand, model, year, price, status and photograph are displayed.
+**Acceptance:** `GET /car/search-lot` and `GET /car/search-available` work without a token. Brand, model, year, price, status and photograph are shown.
 
 **US-2 Request**  
 As a registered customer I request a car so that a sales agent can complete the sale.  
-**Acceptance:** car status becomes `RESERVED`; a `sale` row exists with status `REQUESTED`; the request appears under My requests.
+**Acceptance:** the car becomes `RESERVED`; a `sale` row exists with status `REQUESTED`; I see it under My requests.
 
 **US-3 Approve**  
 As a sales agent I accept a request so that the car is marked sold and the customer is notified.  
-**Acceptance:** sale status `APPROVED`, car status `SOLD`; MongoDB `notifications` and `audit_logs` documents are written; RabbitMQ queues `cdms.notification.email` and `cdms.notification.sms` receive the event.
+**Acceptance:** sale `APPROVED`, car `SOLD`; MongoDB `notifications` and `audit_logs` are written; RabbitMQ queues `cdms.notification.email` and `cdms.notification.sms` receive the event.
 
-Use-case diagram: `docs/use-case.puml`.
-
-```mermaid
-flowchart LR
-  Visitor --> Browse[Browse available cars]
-  Visitor --> Register[Create customer account]
-  Customer --> SignIn[Sign in]
-  Customer --> Request[Request a car]
-  Agent[Sales agent] --> Decide[Accept or reject]
-  Manager --> Supervise[View stock and sales]
-  Admin --> Staff[Create staff login]
-  Decide --> Notify[Notify customer]
-```
+The use-case model is in `docs/use-case.puml`.
 
 ---
 
 ## 2. Domain and data modeling
 
-*(Mid-term items 2–4 — 20 marks)*
+### 2.1 Class diagram
 
-### 2.1 UML class diagram
+I modelled Person as a generalisation of Customer and Employee. A Sale links one Car, one Customer, and (after approval) one Employee. AppUser is the login identity.
 
-Source: `docs/uml-class.puml`.
+The PlantUML source is `docs/uml-class.puml`. An exported view is shown below.
 
-```mermaid
-classDiagram
-  class Person {
-    String firstName
-    String lastName
-    String email
-    String phoneNumber
-  }
-  class Customer {
-    Double creditLimit
-    Date registeredOn
-  }
-  class Employee {
-    String employeeNumber
-    Date hireDate
-    EmployeeRole role
-    Double salary
-  }
-  class Car {
-    String vin
-    String brand
-    String model
-    Integer manufactureYear
-    Double price
-    CarStatus status
-    String imageFile
-  }
-  class Sale {
-    Double amount
-    Date soldOn
-    SaleStatus status
-    String notes
-  }
-  class AppUser {
-    String email
-    String passwordHash
-    String fullName
-    Role role
-    String provider
-  }
-  Person <|-- Customer
-  Person <|-- Employee
-  Customer "1" --> "0..*" Sale : places
-  Employee "0..1" --> "0..*" Sale : approves
-  Car "1" --> "0..1" Sale : subject of
-```
+![Figure 1. Conceptual class diagram](figures/class-diagram.png)
 
-Multiplicity: one customer places many sales; one car has at most one sale; an employee is attached only after approval.
+**Figure 1.** Conceptual class diagram.
+
+- Customer 1 — 0..\* Sale  
+- Employee 0..1 — 0..\* Sale (the employee is set only when the sale is approved)  
+- Car 1 — 0..1 Sale  
 
 ### 2.2 Conceptual model
 
-This section is independent of tables and frameworks.
+This section does not depend on tables or frameworks.
 
 **Actors:** visitor, customer, sales agent, manager, administrator, notification service.
 
-**Processes:** browse stock → register or sign in → request a sale → staff accept or reject → notify the customer.
+**Process:** browse stock → register or sign in → request a sale → staff accept or reject → notify the customer.
 
 **Data objects:** Person, Car, Sale, user account, role, notification document, audit event.
 
-- A person is either a customer or an employee.  
-- An `AppUser` is the login identity (email, credential, role, provider).  
-- A sale links one car, one customer, and (after approval) one employee.  
-- Notification and audit records are documents. They are not joined with SQL foreign keys.
+A person is either a customer or an employee. An application user is the email, credential, role and provider used to sign in. Notification and audit records are documents; they are not SQL join tables.
 
 ### 2.3 Physical schema
 
-Source: `docs/er-schema.puml`.
-
-**PostgreSQL database `carDealership` (operational data)**
+The relational store is PostgreSQL database `carDealership`. Source: `docs/er-schema.puml`.
 
 | Table | Primary key | Constraints and indexes |
 | --- | --- | --- |
-| `app_users` | `id` UUID | `email` UNIQUE; `role` in {ADMIN, MANAGER, SALES_AGENT, CUSTOMER} |
-| `car` | `id` UUID | `vin` UNIQUE, length 17; `price > 0`; `status` in {AVAILABLE, RESERVED, SOLD} |
-| `customer` | `id` UUID | `email` UNIQUE; `credit_limit >= 0` |
+| `app_users` | `id` UUID | `email` UNIQUE; role in ADMIN, MANAGER, SALES_AGENT, CUSTOMER |
+| `car` | `id` UUID | `vin` UNIQUE, length 17; `price > 0`; status AVAILABLE, RESERVED or SOLD |
+| `customer` | `id` UUID | `email` UNIQUE |
 | `employee` | `id` UUID | `employee_number` UNIQUE; `email` UNIQUE |
-| `sale` | `id` UUID | `car_id` UNIQUE FK → `car`; `customer_id` FK → `customer`; `employee_id` FK → `employee` (nullable until approval); `sold_on` nullable |
+| `sale` | `id` UUID | `car_id` UNIQUE FK → car; `customer_id` FK → customer; `employee_id` FK → employee (nullable until approval) |
 
-```mermaid
-erDiagram
-  CUSTOMER ||--o{ SALE : places
-  EMPLOYEE |o--o{ SALE : approves
-  CAR ||--o| SALE : "sold as"
-  CUSTOMER {
-    uuid id PK
-    varchar email UK
-    float credit_limit
-  }
-  EMPLOYEE {
-    uuid id PK
-    varchar employee_number UK
-    varchar role
-  }
-  CAR {
-    uuid id PK
-    char vin UK
-    varchar status
-  }
-  SALE {
-    uuid id PK
-    uuid car_id FK
-    uuid customer_id FK
-    uuid employee_id FK
-    varchar status
-  }
-```
+I confirmed the live schema in pgAdmin. The public schema of `carDealership` contains `app_users`, `car`, `customer`, `employee` and `sale`. A query on `employee` returns the three seeded staff accounts (Jean Mugabo, Claire Iradukunda, Eric Nkusi).
 
-**MongoDB database `cdms_docs` (documents)**
+![Figure 2. PostgreSQL tables in pgAdmin, query on employee](figures/pgadmin-employee.png)
+
+**Figure 2.** pgAdmin connected to `carDealership`. Tables are listed on the left. `SELECT * FROM employee` returns the three staff rows.
+
+MongoDB database `cdms_docs` holds documents:
 
 | Collection | Fields |
 | --- | --- |
@@ -239,112 +158,111 @@ There are no MongoDB foreign keys. `relatedSaleId` stores the sale UUID as a str
 
 ---
 
-## 3. User interface design
+## 3. User interface
 
-*(Final-term item 1 — 10 marks)*
+I implemented the interface in React 19 with Vite. Layout uses CSS Grid and flexbox. Breakpoints are 980px and 600px so the same pages work on a laptop and a narrower window.
 
-The interface is a React 19 single-page application built with Vite. Layout uses CSS Grid and flexbox with breakpoints at 980px and 600px.
-
-| Route | Audience | Purpose |
+| Route | Who uses it | Purpose |
 | --- | --- | --- |
 | `/` | Public | Showroom, search, brand and price filters |
-| `/login` | Public | Email/password sign-in; Google OAuth 2.0 when configured |
+| `/login` | Public | Email and password; Google when OAuth 2.0 is configured |
 | `/register` | Public | Customer self-registration |
-| `/app/showroom` | Customer | Request a car; view own requests |
-| `/app` | Staff | Dashboard and inventory snapshot |
-| `/app/cars` | Staff | Inventory create / update |
+| `/app/showroom` | Customer | Request a car and view own requests |
+| `/app` | Staff | Dashboard |
+| `/app/cars` | Staff | Inventory |
 | `/app/sales` | Staff | Accept or reject requests |
 | `/app/employees` | Administrator | Create staff and portal passwords |
-| `/app/notifications` | Manager, administrator | MongoDB notification and audit documents |
+| `/app/notifications` | Manager, administrator | MongoDB notifications and audit log |
 
-Wireframes are realised by the running application. Evidence for layout adaptability is a wide desktop capture of `/` and the same page at approximately 400px (browser device mode). The public header, hero, catalogue and footer reflow; the staff portal sidebar becomes a horizontal strip on small screens.
+The public landing page at http://localhost:5173 is the main prototype. The hero, statistics strip and featured cars are shown below.
+
+![Figure 3. Public landing page](figures/landing-hero.jpg)
+
+**Figure 3.** Public landing page: showroom heading, search, and inventory counts (25 cars, 19 available, 17 brands).
+
+![Figure 4. Featured vehicles on the lot](figures/landing-featured.jpg)
+
+**Figure 4.** Featured cars a visitor can see without signing in. Requesting a car requires a customer account.
+
+The header, hero and catalogue reflow on a narrow viewport. In the staff portal the sidebar becomes a horizontal strip.
 
 ---
 
-## 4. Architecture and backend implementation
+## 4. Architecture and backend
 
-*(Final-term item 2 — 15 marks)*
+I used a layered monolith, not independently deployed microservices.
 
-CDMS is a **layered monolith**. It is not a set of independently deployed microservices. Layers communicate in one direction: the React client calls HTTP controllers; controllers call application services; services call Spring Data repositories.
-
-```text
+```
 React (http://localhost:5173)
         │  JSON + JWT
         ▼
 Spring Boot controllers
         │
         ▼
-Application services (transactions, business rules)
+Application services (transactions and business rules)
         │
    ┌────┴─────┬──────────────┐
    ▼          ▼              ▼
 PostgreSQL   MongoDB      RabbitMQ
-(JPA)        (documents)  (events)
 ```
 
-Java packages are organised by feature under `rw.ac.auca`: `car`, `customer`, `employee`, `sale`, `user`, `notification`, `messaging`, `security`.
+The React client calls HTTP controllers. Controllers call services. Services call Spring Data repositories. Java packages are organised by feature under `rw.ac.auca`: `car`, `customer`, `employee`, `sale`, `user`, `notification`, `messaging`, `security`.
 
-The backend is Spring Boot. Hibernate `ddl-auto=update` maintains the relational schema. Demo data is inserted only when missing, so a restart does not wipe sales.
+The backend is Spring Boot. Hibernate `ddl-auto=update` keeps the relational schema. Demo users and cars are inserted only when they are missing, so a restart does not wipe sales.
 
 ---
 
 ## 5. Persistence
 
-*(Final-term item 3 — 5 marks)*
-
 | Store | Engine | Database | Contents |
 | --- | --- | --- | --- |
-| Relational | PostgreSQL on the host (pgAdmin) | `carDealership` | cars, customers, employees, sales, users |
+| Relational | PostgreSQL on the host, managed in pgAdmin | `carDealership` | cars, customers, employees, sales, users |
 | Non-relational | MongoDB 7 in Docker (`cdms-mongo`) | `cdms_docs` | `notifications`, `audit_logs` |
 
-PostgreSQL is the system of record for the sale. MongoDB stores the messages produced after registration or approval. Both are required by the brief and both are used at runtime.
+PostgreSQL is the system of record for a sale. MongoDB stores the messages produced after registration or approval. Both stores are used at runtime.
 
 ---
 
 ## 6. Authentication, OAuth 2.0 and authorization
 
-*(Final-term item 4 — 5 marks)*
-
 ### 6.1 Local accounts
 
-Customers register at `POST /auth/register`. The service creates a `customer` row and an `app_users` row. The password is hashed with BCrypt. Login at `POST /auth/login` returns a signed JWT. The React client sends `Authorization: Bearer <token>` on subsequent calls. Staff accounts are created only by an administrator, who also sets the portal password.
+Customers register with `POST /auth/register`. That call creates a `customer` row and an `app_users` row. Passwords are hashed with BCrypt. `POST /auth/login` returns a JWT. The React client sends `Authorization: Bearer <token>` on later requests. Staff accounts are created only by an administrator, who also sets the portal password.
 
 ### 6.2 OAuth 2.0
 
-OAuth 2.0 is implemented with Spring Security’s authorization-code flow and Google as the identity provider (`/oauth2/authorization/google`). On success the handler:
+I implemented OAuth 2.0 with Spring Security’s authorization-code flow and Google as the identity provider (`/oauth2/authorization/google`). After Google authenticates the user, the success handler:
 
-1. Reads the Google profile (email, name, subject).  
+1. Reads email, name and subject from the Google profile.  
 2. Creates an `app_users` row with provider `GOOGLE` if the email is new.  
-3. Creates the matching `customer` row so the user can request a car.  
-4. Issues the same JWT used by password login and redirects to the React callback.
+3. Creates the matching `customer` row so the person can request a car.  
+4. Issues the same JWT as password login and redirects to the React callback.
 
-Client identifier and secret are supplied as environment variables `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. They are not committed. The authorized redirect URI is:
+Client id and secret come from environment variables `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. They are not stored in the repository. The redirect URI is:
 
 `http://localhost:8080/login/oauth2/code/google`
 
-When those variables are unset, email-and-password login remains available. The OAuth 2.0 endpoints and success handler stay in the security configuration.
+If those variables are unset, email and password still work. The OAuth 2.0 endpoints remain in `SecurityConfig`.
 
 ### 6.3 Role-based access control
 
-| Role | Capabilities |
+| Role | What the user can do |
 | --- | --- |
 | Visitor | Browse the lot |
-| CUSTOMER | Register, request a car, view own sales |
+| CUSTOMER | Register, request a car, see own sales |
 | SALES_AGENT | Inventory, accept or reject requests |
 | MANAGER | Customers, all sales, notification documents |
 | ADMIN | All of the above, plus staff accounts |
 
-Enforcement is `@PreAuthorize` on controllers together with the JWT filter. The React sidebar renders only the links allowed for the signed-in role.
+I enforced this with `@PreAuthorize` on controllers and the JWT filter. The React sidebar only shows links allowed for the signed-in role.
 
 ### 6.4 Performance
 
-JSON list endpoints return the persisted collection without extra round-trips beyond JPA fetch of the sale graph. The public lot is a single GET. Vite proxies API calls on the development server so the browser does not wait on CORS preflights for each resource. Seeded inventory (about 25 cars) is sized for sub-second local responses.
+Public inventory is one GET. Vite proxies API calls during development. The seed set is about 25 cars, which stays well under two seconds on localhost.
 
 ---
 
-## 7. Messaging with RabbitMQ
-
-*(Final-term item 5 — 3 marks)*
+## 7. RabbitMQ
 
 RabbitMQ 3 runs in Docker (`cdms-rabbitmq`). The management console is http://localhost:15672 (user `guest`).
 
@@ -355,47 +273,51 @@ RabbitMQ 3 runs in Docker (`cdms-rabbitmq`). The management console is http://lo
 | `cdms.notification.email` | Email document is written |
 | `cdms.notification.sms` | SMS document is written |
 
-Listeners do not send mail through Gmail or SMS through a telecom gateway. They persist `notifications` documents in MongoDB with status `SENT`. That satisfies the broker requirement and keeps the demo fully local.
+Listeners do not send mail through Gmail or SMS through a telecom operator. They write `notifications` documents in MongoDB with status `SENT`. That keeps the demo on localhost and still uses the broker for email, SMS and other events.
 
 ---
 
 ## 8. Version control
 
-*(Final-term item 6 — 2 marks)*
-
-The project is hosted at https://github.com/mukunzijonathan/car-dealership. Work was committed on branch `feature/cdms-final` and submitted as pull request **#1** into `main`:
+I hosted the project at https://github.com/mukunzijonathan/car-dealership. I worked on branch `feature/cdms-final` and opened pull request **#1** into `main`. GitHub Actions compiled the backend and built the frontend; all checks passed.
 
 https://github.com/mukunzijonathan/car-dealership/pull/1
 
+![Figure 5. Pull request #1 into main, CI green](figures/github-pr.png)
+
+**Figure 5.** Pull request #1, `feature/cdms-final` into `main`. CI jobs for backend and frontend succeeded. There are no merge conflicts.
+
 ---
 
-## 9. Quality, testing and DevOps
+## 9. Testing and DevOps
 
-*(Bonus)*
+**DevOps.** `docker-compose.yml` starts MongoDB and RabbitMQ. `.github/workflows/ci.yml` compiles Spring Boot and builds the React application on each push. That is the same pipeline shown as green on the pull request.
 
-**DevOps.** `docker-compose.yml` starts MongoDB and RabbitMQ as named containers. A GitHub Actions workflow (`.github/workflows/ci.yml`) compiles the Spring Boot module and builds the React application on each push.
+**Testing.** I verified the API with Postman (`postman/CDMS.postman_collection.json`). Sample bodies are in `postman/DUMMY-DATA.md`. Automated JUnit coverage is limited; the collection is the main API check.
 
-**Testing.** A Postman collection (`postman/CDMS.postman_collection.json`) covers login, cars, customers, staff and sales. Dummy payloads are listed in `postman/DUMMY-DATA.md`. Automated JUnit coverage is limited; API verification is performed with the collection.
-
-**Technologies used beyond a basic CRUD tutorial:** JWT, OAuth 2.0, React, Docker Compose, RabbitMQ and MongoDB alongside PostgreSQL.
+**Other technologies I used:** JWT, OAuth 2.0, React, Docker Compose, RabbitMQ and MongoDB together with PostgreSQL.
 
 ---
 
 ## 10. How to run the system
 
-**Prerequisites:** PostgreSQL with database `carDealership`, Docker, JDK 21, Maven, Node.js.
+Prerequisites: PostgreSQL with database `carDealership`, Docker, JDK 21, Maven, Node.js.
 
 ```bash
 docker compose up -d
 cd backend && mvn spring-boot:run
-# other terminal
+```
+
+```bash
 cd frontend && npm install && npm run dev
 ```
 
-- User interface: http://localhost:5173  
-- API: http://localhost:8080  
-- RabbitMQ console: http://localhost:15672 (`guest` / `guest`)  
-- MongoDB: `mongodb://localhost:27017`, database `cdms_docs`
+| Service | Address |
+| --- | --- |
+| User interface | http://localhost:5173 |
+| API | http://localhost:8080 |
+| RabbitMQ console | http://localhost:15672 (`guest` / `guest`) |
+| MongoDB | `mongodb://localhost:27017`, database `cdms_docs` |
 
 | Role | Email | Password |
 | --- | --- | --- |
@@ -404,7 +326,7 @@ cd frontend && npm install && npm run dev
 | Sales agent | agent@cdms.rw | Agent#123 |
 | Customer | customer@cdms.rw | Customer#123 |
 
-Optional Google sign-in:
+Google sign-in, when a client is registered in Google Cloud:
 
 ```bash
 export GOOGLE_CLIENT_ID='…'
@@ -415,13 +337,18 @@ export GOOGLE_CLIENT_SECRET='…'
 
 ## 11. Conclusion
 
-CDMS takes a real showroom problem through requirements, conceptual and physical modeling, a responsive React interface, a layered Spring Boot API, two persistence technologies, OAuth 2.0 and JWT security, RBAC, RabbitMQ events, and a GitHub pull request into `main`. Email and SMS are represented as broker-backed documents rather than live telecom messages, which is appropriate for a localhost academic deployment.
+I took a real showroom problem through requirements, conceptual and physical modelling, a React interface, a layered Spring Boot API, PostgreSQL and MongoDB, OAuth 2.0 and JWT, RBAC, RabbitMQ, and a pull request into `main`. Email and SMS are stored as broker-backed documents rather than sent through a public mail or SMS provider, which matches a localhost academic deployment.
 
-**Figures in this folder**
+---
 
-| File | Content |
-| --- | --- |
-| `uml-class.puml` | Conceptual class diagram |
-| `er-schema.puml` | Physical schema |
-| `use-case.puml` | Use-case diagram |
-| `class-diagram.png` | Earlier exported class diagram |
+## 12. List of figures
+
+| Figure | File | Description |
+| --- | --- | --- |
+| 1 | `figures/class-diagram.png` | Conceptual class diagram |
+| 2 | `figures/pgadmin-employee.png` | PostgreSQL `carDealership` in pgAdmin |
+| 3 | `figures/landing-hero.jpg` | Public landing page |
+| 4 | `figures/landing-featured.jpg` | Featured cars |
+| 5 | `figures/github-pr.png` | Pull request #1 with CI passing |
+
+PlantUML sources: `uml-class.puml`, `er-schema.puml`, `use-case.puml`.
